@@ -1,0 +1,152 @@
+## IMI configuration file
+## Docs: https://imi.readthedocs.io/en/latest/getting-started/imi-config-file.html
+
+## ===================== General =====================
+RunName: "NorthernIranCH4TROPOMI_r2"
+UseSlurm: true
+SafeMode: false            # allow resuming/overwriting outputs for this run
+
+# Upload run outputs to S3
+S3Upload: true
+S3UploadPath: "s3://north-iran-test-03-10-25/runs/NorthernIranCH4TROPOMI_r2/"
+S3UploadFiles: ["*"]
+
+# Reuse a pre-downloaded TROPOMI cache (skips sbatch -W)
+
+## ================= Period of interest ===============
+StartDate: 20200601
+EndDate: 20200630
+SpinupMonths: 1
+
+## ================ Observations ======================
+BlendedTROPOMI: false
+UseWaterObs: false
+
+## ================ Domain / Region ===================
+isRegional: true
+RegionID: "ME"         # Middle East met tiles
+
+# Rectilinear state vector bounds (used if CreateAutomaticRectilinearStateVectorFile: true)
+LonMin: 48.34
+LonMax: 56.35
+LatMin: 35.50
+LatMax: 38.60
+
+## ============ Kalman filter options =================
+KalmanMode: false
+UpdateFreqDays: 7
+NudgeFactor: 0.1
+MakePeriodsCSV: true
+
+## ================ Nested grid =======================
+NestedGrid: true
+NestedRegion: "ME"
+
+## ================ State vector ======================
+CreateAutomaticRectilinearStateVectorFile: true
+nBufferClusters: 8
+BufferDeg: 5
+LandThreshold: 0.25
+OffshoreEmisThreshold: 0
+OptimizeBCs: false
+OptimizeOH: false
+
+## ================ Clustering ========================
+ReducedDimensionStateVector: false
+ClusteringMethod: "kmeans"
+NumberOfElements: 80
+ForcedNativeResolutionElements:
+  - [37.28, 49.60]
+  - [36.55, 53.10]
+  - [36.84, 54.43]
+
+## ============ Custom state vector files =============
+StateVectorFile: "/home/ubuntu/integrated_methane_inversion/resources/statevectors/StateVector.nc"
+ShapeFile: "/home/ubuntu/integrated_methane_inversion/resources/shapefiles/PermianBasin_Extent_201712.shp"
+
+## ================== Inversion =======================
+LognormalErrors: true
+PriorError: [1.2]
+PriorErrorBCs: [10.0]
+PriorErrorBufferElements: [0.7]
+PriorErrorOH: [0.1]
+ObsError: [15]
+Gamma: [0.5]
+PrecomputedJacobian: false
+
+## =================== Grid/Met =======================
+Res: "0.25x0.3125"
+Met: "geosfp"
+
+## ================ Setup modules =====================
+RunSetup: true
+SetupTemplateRundir: true
+SetupSpinupRun: true
+SetupJacobianRuns: true
+SetupInversion: true
+SetupPosteriorRun: true
+
+## ================= Run modules ======================
+DoHemcoPriorEmis: true
+DoSpinup: true
+DoJacobian: true
+ReDoJacobian: true
+DoInversion: true
+DoPosterior: true
+
+## ================== Preview =========================
+DoPreview: false
+DOFSThreshold: 0
+
+## ======== Advanced settings (required vars) =========
+# Jacobian perturbations
+PerturbValue: 1.5           # 1e-8 kg/m2/s units
+PerturbValueOH: 1.1
+PerturbValueBCs: 10.0
+
+# Diagnostics toggles required by sanitizer
+HourlyCH4: true
+PLANEFLIGHT: false
+GOSAT: false
+TCCON: false
+AIRS: false
+
+## ============== Slurm resources =====================
+RequestedCPUs: 8
+RequestedMemory: 10000
+InversionCPUs: 32
+InversionMemory: 32000
+RequestedTime: "0-24:00"
+SchedulerPartition: "debug"
+MaxSimultaneousRuns: 6
+NumJacobianTracers: 5
+
+## =========== Local cluster / paths ==================
+OutputPath: "/home/ubuntu/imi_output_dir"
+DataPath: "/home/ubuntu/ExtData"
+
+# GEOS-Chem env (we created this file)
+GEOSChemEnv: "/home/ubuntu/geoschem_env.sh"
+
+# Conda/mamba init file + env name
+CondaFile: "/home/ubuntu/.bashrc"
+CondaEnv: "imi_env"
+
+# Restart / BC inputs
+RestartDownload: true
+RestartFilePrefix: "/home/ubuntu/ExtData/BoundaryConditions/v2024-06/GEOSChem.BoundaryConditions."
+RestartFilePreviewPrefix: "/home/ubuntu/ExtData/BoundaryConditions/v2024-06/GEOSChem.BoundaryConditions."
+BCpath: "/home/ubuntu/ExtData/BoundaryConditions"
+BCversion: "v2023-06"
+
+# Dry-run data fetchers (set to false to auto-download during runs)
+HemcoPriorEmisDryRun: true
+SpinupDryrun: true
+ProductionDryRun: true
+PosteriorDryRun: true
+BCdryrun: true
+
+
+scp -i /Users/daniorozco/Desktop/imi/ssh/dani_test.pem \
+  ubuntu@35.153.175.158:/home/ubuntu/imi_output_dir/NorthernIranCH4TROPOMI_r2/imi_output.log \
+  /Users/daniorozco/Desktop/repo_imi/logs/NorthernIranCH4TROPOMI_r2/imi_output.log
