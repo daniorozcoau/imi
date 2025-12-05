@@ -145,8 +145,3 @@ SpinupDryrun: true
 ProductionDryRun: true
 PosteriorDryRun: true
 BCdryrun: true
-
-
-scp -i /Users/daniorozco/Desktop/imi/ssh/dani_test.pem \
-  ubuntu@35.153.175.158:/home/ubuntu/imi_output_dir/NorthernIranCH4TROPOMI_r2/imi_output.log \
-  /Users/daniorozco/Desktop/repo_imi/logs/NorthernIranCH4TROPOMI_r2/imi_output.log
